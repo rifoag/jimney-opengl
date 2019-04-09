@@ -5,3 +5,9 @@ build:
 
 run:
 	./main
+
+rifo:
+	g++ -I/usr/inlcude -Iinclude -o main main.cpp glad.c -lglfw3 -lGL -lGLU -lX11 -lXi -lXrandr -lXxf86vm -lXinerama -lXcursor -lrt -lm -lpthread -ldl -lm
+
+remove:
+	rm main
