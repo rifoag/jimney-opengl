@@ -117,20 +117,20 @@ int main() {
 
     float vertices[] = {
         // points                       colors                      texture coords
-        0.92,   0.41,   0.00,           1.0, 1.0, 1.0,              1.0, 1.0,                  // alas top right
-        0.92,   -0.41,   0.00,          1.0, 1.0, 1.0,              1.0, 0.0,                  // alas bottom right
-        -0.92,  -0.41,  0.00,           1.0, 1.0, 1.0,              0.0, 0.0,                  // alas bottom left
-        -0.92,  0.41,   0.00,           1.0, 1.0, 1.0,              0.0, 1.0,                  // alas top left
-        0.92,   0.41,   0.25,           1.0, 1.0, 1.0,              1.0, 1.0,                         
-        0.92,   -0.41,  0.25,           1.0, 1.0, 1.0,              1.0, 0.0,                         
-        -0.92,  -0.41,  0.25,           1.0, 1.0, 1.0,              0.0, 0.0,                         
-        -0.92,  0.41,   0.25,           1.0, 1.0, 1.0,              0.0, 0.1,              
-        0.00,   0.41,   0.25,           1.0, 1.0, 1.0,              1.0, 0.0,              
-        0.00,   -0.41,  0.25,           1.0, 1.0, 1.0,              1.0, 1.0,             
-        0.92,   0.41,   0.5,            1.0, 1.0, 1.0,              0.0, 0.0,              
-        0.92,   -0.41,  0.5,            1.0, 1.0, 1.0,              0.0, 0.1,              
-        0.00,   -0.41,  0.5,            1.0, 1.0, 1.0,              1.0, 1.0,              
-        0.00,   0.41,   0.5,            1.0, 1.0, 1.0,              1.0, 0.0,              
+        0.92,   0.41,   0.00,           1.0, 1.0, 1.0,              0.0, 1.0,                  // alas top right 0
+        0.92,   -0.41,  0.00,           1.0, 1.0, 1.0,              1.0, 0.0,                  // alas bottom right
+        -0.92,  -0.41,  0.00,           1.0, 1.0, 1.0,              0.0, 1.0,                  // alas bottom left
+        -0.92,  0.41,   0.00,           1.0, 1.0, 1.0,              0.0, 0.0,                  // alas top left
+        0.92,   0.41,   0.25,           1.0, 1.0, 1.0,              1.0, 1.0,                  // tengah top right 5     
+        0.92,   -0.41,  0.25,           1.0, 1.0, 1.0,              1.0, 0.0,                  // tengah top left
+        -0.92,  -0.41,  0.25,           1.0, 1.0, 1.0,              0.2, 1.0,                  // tengah bottom left      
+        -0.92,  0.41,   0.25,           1.0, 1.0, 1.0,              0.2, 0.0,                  // tengah bottom right
+        0.00,   0.41,   0.25,           1.0, 1.0, 1.0,              0.5, 0.0,                  // tengah middle right 9
+        0.00,   -0.41,  0.25,           1.0, 1.0, 1.0,              0.5, 1.0,                  // tengah middle left
+        0.92,   0.41,   0.5,            1.0, 1.0, 1.0,              0.7, 0.0,                  // atas top right
+        0.92,   -0.41,  0.5,            1.0, 1.0, 1.0,              1.0, 0.0,                  // atas top left
+        0.00,   -0.41,  0.5,            1.0, 1.0, 1.0,              1.0, 1.0,                  // atas bottom left
+        0.00,   0.41,   0.5,            1.0, 1.0, 1.0,              0.7, 1.0,                  // atas bottom right
     };
 
     unsigned int indices[] = {
@@ -155,7 +155,8 @@ int main() {
         4,5,10,
         5,10,11,
         10,11,12,
-        10,12,13
+        10,12,13,
+        1,2,5
     };
 
     glm::mat4 model = glm::mat4(1.0f);
@@ -196,8 +197,8 @@ int main() {
     glGenTextures(1, &texture);
     glBindTexture(GL_TEXTURE_2D, texture); // all upcoming GL_TEXTURE_2D operations now have effect on this texture object
     // set the texture wrapping parameters
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	// set texture wrapping to GL_REPEAT (default wrapping method)
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);	// set texture wrapping to GL_REPEAT (default wrapping method)
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
     // set texture filtering parameters
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -235,7 +236,7 @@ int main() {
         glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
         glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(projection));
 
-        glDrawElements(GL_TRIANGLES, 66, GL_UNSIGNED_INT, 0);
+        glDrawElements(GL_TRIANGLES, 69, GL_UNSIGNED_INT, 0);
 
         glfwSwapBuffers(window);
         glfwPollEvents();
