@@ -9,10 +9,12 @@ uniform mat4 projection;
 
 out vec3 ourColor;
 out vec2 TextCoord;
+out vec3 FragPos;
 
 void main()
 {
     gl_Position = projection * view * model * vec4(aPos.xzy, 1.0);
     ourColor = aColor;
     TextCoord = aTextCoord;
+    FragPos = vec3(model * vec4(aPos.xzy, 1.0));
 }

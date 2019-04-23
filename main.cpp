@@ -22,7 +22,7 @@ const unsigned int SCR_HEIGHT = 600;
 glm::vec3 cameraPos   = glm::vec3(0.0f, 0.0f,  3.0f);
 glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
 glm::vec3 cameraUp    = glm::vec3(0.0f, 1.0f,  0.0f);
-
+glm::vec3 lightPos(1.2f, 1.0f, 2.0f);
 int rotate = 0;
 
 int main() {
@@ -50,6 +50,11 @@ int main() {
     Shader ourShader("shaders/jimney.vs", "shaders/jimney.fs"); 
 
     glm::mat4 model = glm::mat4(1.0f);
+
+    glm::mat4 light_model = glm::mat4(1.0);
+    light_model = glm::translate(light_model, lightPos);
+    light_model = glm::scale(light_model, glm::vec3(0.2f));
+
     glm::mat4 view = glm::mat4(1.0f);
     glm::mat4 projection = glm::perspective(glm::radians(90.0f), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
 
@@ -113,11 +118,11 @@ int main() {
     glBindBuffer(GL_ARRAY_BUFFER, lightVBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(light_sources), light_sources, GL_STATIC_DRAW);
 
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, lightEBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(light_sources_indices), light_sources_indices, GL_STATIC_DRAW);
-    
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6*sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
+
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6*sizeof(float), (void*)(3*sizeof(float)));
+    glEnableVertexAttribArray(1);
     
 
     glEnable(GL_DEPTH_TEST);
@@ -138,18 +143,19 @@ int main() {
         ourShader.setMat4("projection", projection);
         ourShader.setVec3("objectColor", 1.0f, 0.5f, 0.31f);
         ourShader.setVec3("lightColor",  1.0f, 1.0f, 1.0f);
+        ourShader.setVec3("lightPos", lightPos.x, lightPos.y, lightPos.z);
 
         glDrawElements(GL_TRIANGLES, 69, GL_UNSIGNED_INT, 0);
 
 
         light_shader.use();
-        light_shader.setMat4("model", model);
+        light_shader.setMat4("model", light_model);
         light_shader.setMat4("view", view);
         light_shader.setMat4("projection", projection);
 
         glBindVertexArray(lightVAO);
         glBindBuffer(GL_ARRAY_BUFFER, lightVBO);
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+        glDrawArrays(GL_TRIANGLES, 0, 36);
 
 
         glfwSwapBuffers(window);
