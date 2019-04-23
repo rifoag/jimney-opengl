@@ -45,4 +45,11 @@ unsigned int indices[] = {
     1,2,5
 };
 
+float light_sources[] = {
+    1.0, 1.0, 1.0,
+    1.0, 0.95, 1.0,
+    0.95, 0.95, 1.0,
+    0.95, 1.0, 1.0
+};
+
 #endif
