@@ -103,14 +103,18 @@ int main() {
 
     Shader light_shader("shaders/lighting.vs", "shaders/lighting.fs");
 
-    unsigned int lightVAO, lightVBO;
+    unsigned int lightVAO, lightVBO, lightEBO;
     glGenVertexArrays(1, &lightVAO);
     glGenBuffers(1, &lightVBO);
+    glGenBuffers(1, &lightEBO);
 
     glBindVertexArray(lightVAO);
 
     glBindBuffer(GL_ARRAY_BUFFER, lightVBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(light_sources), light_sources, GL_STATIC_DRAW);
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, lightEBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(light_sources_indices), light_sources_indices, GL_STATIC_DRAW);
     
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
     glEnableVertexAttribArray(0);
@@ -132,6 +136,8 @@ int main() {
         ourShader.setMat4("model", model);
         ourShader.setMat4("view", view);
         ourShader.setMat4("projection", projection);
+        ourShader.setVec3("objectColor", 1.0f, 0.5f, 0.31f);
+        ourShader.setVec3("lightColor",  1.0f, 1.0f, 1.0f);
 
         glDrawElements(GL_TRIANGLES, 69, GL_UNSIGNED_INT, 0);
 
@@ -140,12 +146,10 @@ int main() {
         light_shader.setMat4("model", model);
         light_shader.setMat4("view", view);
         light_shader.setMat4("projection", projection);
-        light_shader.setVec3("objectColor", 1.0f, 0.5f, 0.31f);
-        light_shader.setVec3("lightColor",  1.0f, 1.0f, 1.0f);
 
         glBindVertexArray(lightVAO);
         glBindBuffer(GL_ARRAY_BUFFER, lightVBO);
-        glDrawArrays(GL_TRIANGLES, 0, 3);
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
 
         glfwSwapBuffers(window);
