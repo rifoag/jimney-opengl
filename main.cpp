@@ -1,14 +1,14 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
-#include <iostream> 
-
-#include "shader_s.h"
-#define STB_IMAGE_IMPLEMENTATION
-#include "stb_image.h"
-
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <iostream> 
+
+#include <shader_s.h>
+#define STB_IMAGE_IMPLEMENTATION
+#include <stb_image.h>
+
 
 using namespace std;
 
@@ -46,24 +46,24 @@ int main() {
         return -1;
     }
 
-    Shader ourShader("jimney.vs", "jimney.fs"); 
+    Shader ourShader("shaders/jimney.vs", "shaders/jimney.fs"); 
 
     float vertices[] = {
-        // points                       colors                      texture coords
-        0.92,   0.41,   0.00,           1.0, 1.0, 1.0,              0.0, 1.0,                  // alas top right 0
-        0.92,   -0.41,  0.00,           1.0, 1.0, 1.0,              1.0, 0.0,                  // alas bottom right
-        -0.92,  -0.41,  0.00,           1.0, 1.0, 1.0,              0.0, 1.0,                  // alas bottom left
-        -0.92,  0.41,   0.00,           1.0, 1.0, 1.0,              0.0, 0.0,                  // alas top left
-        0.92,   0.41,   0.25,           1.0, 1.0, 1.0,              1.0, 1.0,                  // tengah top right 5     
-        0.92,   -0.41,  0.25,           1.0, 1.0, 1.0,              1.0, 0.0,                  // tengah top left
-        -0.92,  -0.41,  0.25,           1.0, 1.0, 1.0,              0.2, 1.0,                  // tengah bottom left      
-        -0.92,  0.41,   0.25,           1.0, 1.0, 1.0,              0.2, 0.0,                  // tengah bottom right
-        0.00,   0.41,   0.25,           1.0, 1.0, 1.0,              0.5, 0.0,                  // tengah middle right 9
-        0.00,   -0.41,  0.25,           1.0, 1.0, 1.0,              0.5, 1.0,                  // tengah middle left
-        0.92,   0.41,   0.5,            1.0, 1.0, 1.0,              0.7, 0.0,                  // atas top right
-        0.92,   -0.41,  0.5,            1.0, 1.0, 1.0,              1.0, 0.0,                  // atas top left
-        0.00,   -0.41,  0.5,            1.0, 1.0, 1.0,              1.0, 1.0,                  // atas bottom left
-        0.00,   0.41,   0.5,            1.0, 1.0, 1.0,              0.7, 1.0,                  // atas bottom right
+        // points             colors         texture coords
+        0.92,   0.41,   0.00, 1.0, 1.0, 1.0, 0.0, 1.0,  // alas top right 0
+        0.92,   -0.41,  0.00, 1.0, 1.0, 1.0, 1.0, 0.0,  // alas bottom right
+        -0.92,  -0.41,  0.00, 1.0, 1.0, 1.0, 0.0, 1.0,  // alas bottom left
+        -0.92,  0.41,   0.00, 1.0, 1.0, 1.0, 0.0, 0.0,  // alas top left
+        0.92,   0.41,   0.25, 1.0, 1.0, 1.0, 1.0, 1.0,  // tengah top right 5     
+        0.92,   -0.41,  0.25, 1.0, 1.0, 1.0, 1.0, 0.0,  // tengah top left
+        -0.92,  -0.41,  0.25, 1.0, 1.0, 1.0, 0.2, 1.0,  // tengah bottom left      
+        -0.92,  0.41,   0.25, 1.0, 1.0, 1.0, 0.2, 0.0,  // tengah bottom right
+        0.00,   0.41,   0.25, 1.0, 1.0, 1.0, 0.5, 0.0,  // tengah middle right 9
+        0.00,   -0.41,  0.25, 1.0, 1.0, 1.0, 0.5, 1.0,  // tengah middle left
+        0.92,   0.41,   0.5,  1.0, 1.0, 1.0, 0.7, 0.0,  // atas top right
+        0.92,   -0.41,  0.5,  1.0, 1.0, 1.0, 1.0, 0.0,  // atas top left
+        0.00,   -0.41,  0.5,  1.0, 1.0, 1.0, 1.0, 1.0,  // atas bottom left
+        0.00,   0.41,   0.5,  1.0, 1.0, 1.0, 0.7, 1.0,  // atas bottom right
     };
 
     unsigned int indices[] = {
@@ -112,30 +112,33 @@ int main() {
     // position attribute
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8*sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
+
     // color attribute
     glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8*sizeof(float), (void*)(3 * sizeof(float)));
     glEnableVertexAttribArray(1);
+
     // texture coord attribute
     glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8*sizeof(float), (void*)(6 * sizeof(float)));
     glEnableVertexAttribArray(2);
 
-    glEnable(GL_DEPTH_TEST);
 
     // load and create a texture 
     // -------------------------
     unsigned int texture;
     glGenTextures(1, &texture);
     glBindTexture(GL_TEXTURE_2D, texture); // all upcoming GL_TEXTURE_2D operations now have effect on this texture object
+
     // set the texture wrapping parameters
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);	// set texture wrapping to GL_REPEAT (default wrapping method)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
+
     // set texture filtering parameters
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
     // load image, create texture and generate mipmaps
     int width, height, nrChannels;
-    // The FileSystem::getPath(...) is part of the GitHub repository so we can find files on any IDE/platform; replace it with your own image path.
-    unsigned char *data = stbi_load("container.jpg", &width, &height, &nrChannels, 0);
+    unsigned char *data = stbi_load("textures/metal.jpg", &width, &height, &nrChannels, 0);
     if (data){
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
         glGenerateMipmap(GL_TEXTURE_2D);
@@ -144,6 +147,8 @@ int main() {
         std::cout << "Failed to load texture" << endl;
     }
     stbi_image_free(data);
+
+    glEnable(GL_DEPTH_TEST);
 
     while (!glfwWindowShouldClose(window)) {
         processInput(window);
