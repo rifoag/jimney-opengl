@@ -8,6 +8,7 @@
 #include <shader_s.h>
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
+#include "vertex.h"
 
 
 using namespace std;
@@ -35,7 +36,7 @@ int main() {
     if (window == NULL) {
         cout << "Failed to create window" << endl;
         glfwTerminate();
-        return -1;
+        exit(0);
     }
 
     glfwMakeContextCurrent(window);
@@ -43,54 +44,10 @@ int main() {
 
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
         cout << "Failed to initialize glad" << endl;
-        return -1;
+        exit(0);
     }
 
     Shader ourShader("shaders/jimney.vs", "shaders/jimney.fs"); 
-
-    float vertices[] = {
-        // points             colors         texture coords
-        0.92,   0.41,   0.00, 1.0, 1.0, 1.0, 0.0, 1.0,  // alas top right 0
-        0.92,   -0.41,  0.00, 1.0, 1.0, 1.0, 1.0, 0.0,  // alas bottom right
-        -0.92,  -0.41,  0.00, 1.0, 1.0, 1.0, 0.0, 1.0,  // alas bottom left
-        -0.92,  0.41,   0.00, 1.0, 1.0, 1.0, 0.0, 0.0,  // alas top left
-        0.92,   0.41,   0.25, 1.0, 1.0, 1.0, 1.0, 1.0,  // tengah top right 5     
-        0.92,   -0.41,  0.25, 1.0, 1.0, 1.0, 1.0, 0.0,  // tengah top left
-        -0.92,  -0.41,  0.25, 1.0, 1.0, 1.0, 0.2, 1.0,  // tengah bottom left      
-        -0.92,  0.41,   0.25, 1.0, 1.0, 1.0, 0.2, 0.0,  // tengah bottom right
-        0.00,   0.41,   0.25, 1.0, 1.0, 1.0, 0.5, 0.0,  // tengah middle right 9
-        0.00,   -0.41,  0.25, 1.0, 1.0, 1.0, 0.5, 1.0,  // tengah middle left
-        0.92,   0.41,   0.5,  1.0, 1.0, 1.0, 0.7, 0.0,  // atas top right
-        0.92,   -0.41,  0.5,  1.0, 1.0, 1.0, 1.0, 0.0,  // atas top left
-        0.00,   -0.41,  0.5,  1.0, 1.0, 1.0, 1.0, 1.0,  // atas bottom left
-        0.00,   0.41,   0.5,  1.0, 1.0, 1.0, 0.7, 1.0,  // atas bottom right
-    };
-
-    unsigned int indices[] = {
-        0,1,3,
-        1,2,3,
-        0,3,4,
-        3,4,7,
-        2,3,6,
-        3,6,7,
-        1,2,6,
-        2,5,6,
-        0,1,5,
-        0,4,5,
-        4,5,6,
-        4,6,7,
-        4,10,13,
-        4,8,13,
-        8,12,13,
-        8,9,12,
-        9,11,12,
-        5,9,11,
-        4,5,10,
-        5,10,11,
-        10,11,12,
-        10,12,13,
-        1,2,5
-    };
 
     glm::mat4 model = glm::mat4(1.0f);
     glm::mat4 view = glm::mat4(1.0f);
@@ -109,15 +66,11 @@ int main() {
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
-    // position attribute
+    // Attr
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8*sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
-
-    // color attribute
     glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8*sizeof(float), (void*)(3 * sizeof(float)));
     glEnableVertexAttribArray(1);
-
-    // texture coord attribute
     glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8*sizeof(float), (void*)(6 * sizeof(float)));
     glEnableVertexAttribArray(2);
 
@@ -148,14 +101,16 @@ int main() {
     }
     stbi_image_free(data);
 
-    glEnable(GL_DEPTH_TEST);
+    unsigned int lightVAO;
+    glGenVertexArrays(1, &lightVAO);
+    glBindVertexArray(lightVAO);
 
+    glEnable(GL_DEPTH_TEST);
     while (!glfwWindowShouldClose(window)) {
         processInput(window);
 
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
         ourShader.use();
         glBindVertexArray(VAO);
 
