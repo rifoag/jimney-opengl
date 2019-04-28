@@ -1,7 +1,7 @@
 all: build run
 
 build: 
-	gcc -lstdc++ -lglfw -lGL -lX11 -lpthread -lXrandr -lXi -ldl -lm -L/lib -Iinclude -I/usr/include -o main main.cpp glad.c
+	gcc -lstdc++ -lglfw -lGL -lX11 -lpthread -lXrandr -lXi -ldl -lm -L/lib -Iinclude -I/usr/include -o main main.cpp include/glad.c
 
 run:
 	./main
