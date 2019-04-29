@@ -4,14 +4,15 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <iostream> 
+#include <vector>
 
 #include <shader_s.h>
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
 #include "vertex.h"
 
-
 using namespace std;
+
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow* window);
@@ -24,6 +25,7 @@ glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
 glm::vec3 cameraUp    = glm::vec3(0.0f, 1.0f,  0.0f);
 glm::vec3 lightPos(1.2f, 1.0f, 2.0f);
 int rotate = 0;
+
 
 int main() {
     glfwInit();
@@ -46,7 +48,6 @@ int main() {
         cout << "Failed to initialize glad" << endl;
         exit(0);
     }
-
     Shader ourShader("shaders/jimney.vs", "shaders/jimney.fs"); 
 
     glm::mat4 model = glm::mat4(1.0f);
@@ -58,6 +59,8 @@ int main() {
     glm::mat4 view = glm::mat4(1.0f);
     glm::mat4 projection = glm::perspective(glm::radians(90.0f), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
 
+
+    // JIMNEY OBJECT
     unsigned int VBO, VAO, EBO;
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
@@ -71,7 +74,6 @@ int main() {
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
-    // Attr
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8*sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8*sizeof(float), (void*)(3 * sizeof(float)));
@@ -79,22 +81,16 @@ int main() {
     glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8*sizeof(float), (void*)(6 * sizeof(float)));
     glEnableVertexAttribArray(2);
 
-
-    // load and create a texture 
-    // -------------------------
     unsigned int texture;
     glGenTextures(1, &texture);
-    glBindTexture(GL_TEXTURE_2D, texture); // all upcoming GL_TEXTURE_2D operations now have effect on this texture object
+    glBindTexture(GL_TEXTURE_2D, texture);
 
-    // set the texture wrapping parameters
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
 
-    // set texture filtering parameters
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-    // load image, create texture and generate mipmaps
     int width, height, nrChannels;
     unsigned char *data = stbi_load("textures/metal.jpg", &width, &height, &nrChannels, 0);
     if (data){
@@ -108,6 +104,8 @@ int main() {
 
     Shader light_shader("shaders/lighting.vs", "shaders/lighting.fs");
 
+
+    // LIGHT
     unsigned int lightVAO, lightVBO, lightEBO;
     glGenVertexArrays(1, &lightVAO);
     glGenBuffers(1, &lightVBO);
@@ -125,15 +123,46 @@ int main() {
     glEnableVertexAttribArray(1);
     
 
+    // Particles
+    unsigned int nr_particles = 1;
+    vector<Particle> particles;
+    for(unsigned int i = 0; i < nr_particles; i++) {
+        float x = (rand()%100)/100.0;
+        float y = (rand()%100)/100.0;
+        float z = (rand()%100)/100.0;
+        particles.push_back(Particle(glm::vec4(x, y, z, 0.0)));
+    }
+
+    unsigned int particleVAO, particleVBO, particleEBO;
+    glGenVertexArrays(1, &particleVAO);
+    glGenBuffers(1, &particleVBO);
+    glGenBuffers(1, &particleEBO);
+    glBindVertexArray(particleVAO);
+    glBindBuffer(GL_ARRAY_BUFFER, particleVBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(base_particle), base_particle, GL_STATIC_DRAW);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, particleEBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(base_particle_indices), base_particle_indices, GL_STATIC_DRAW);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
+    glEnableVertexAttribArray(0);
+
+    glm::mat4 transform = glm::mat4(1.0);
+    transform = glm::scale(transform, glm::vec3(0.05, 0.05, 0.05));
+
+    Shader particle_shader("shaders/particle.vs", "shaders/particle.fs");
+
+
     glEnable(GL_DEPTH_TEST);
     while (!glfwWindowShouldClose(window)) {
         processInput(window);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 
+        // JIMNEY
         model = glm::rotate(model, glm::radians(1.0f) * rotate, glm::vec3(0.0f, 1.0f, 0.0f));
         view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
+        view = glm::rotate(view, glm::radians(1.0f) * rotate, glm::vec3(0.0f, 1.0f, 0.0f));
 
+        #ifdef JIMNEY
         ourShader.use();
         glBindVertexArray(VAO);
         glBindBuffer(GL_ARRAY_BUFFER, VBO);
@@ -146,8 +175,10 @@ int main() {
         ourShader.setVec3("lightPos", lightPos.x, lightPos.y, lightPos.z);
 
         glDrawElements(GL_TRIANGLES, 69, GL_UNSIGNED_INT, 0);
+        #endif
 
 
+        #ifdef LIGHT
         light_shader.use();
         light_shader.setMat4("model", light_model);
         light_shader.setMat4("view", view);
@@ -156,7 +187,23 @@ int main() {
         glBindVertexArray(lightVAO);
         glBindBuffer(GL_ARRAY_BUFFER, lightVBO);
         glDrawArrays(GL_TRIANGLES, 0, 36);
+        #endif
 
+
+        //PARTICLE
+        particle_shader.setMat4("model", model);
+        particle_shader.use();
+        particle_shader.setMat4("view", view);
+        particle_shader.setMat4("projection", projection);
+        particle_shader.setMat4("transform", transform);
+        for (Particle particle: particles) {
+            //particle_shader.setVec2("offset", particle.Position.x, particle.Position.y);
+            //particle_shader.setVec4("color", particle.color);
+            cout<< particle.offset.x << endl;
+            particle_shader.setVec4("offset", particle.offset);
+            glBindVertexArray(particleVAO);
+            glDrawElements(GL_TRIANGLES, 24, GL_UNSIGNED_INT, 0);
+        }
 
         glfwSwapBuffers(window);
         glfwPollEvents();

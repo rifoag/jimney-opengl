@@ -1,6 +1,12 @@
 #ifndef JIMNEY_VERTEX
 #define JIMNEY_VERTEX
 
+#include <glad/glad.h>
+#include <GLFW/glfw3.h>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+
 float vertices[] = {
     // points             colors         texture coords
     0.92,   0.41,   0.00, 1.0, 1.0, 1.0, 0.0, 1.0,  // alas top right 0
@@ -88,5 +94,32 @@ float light_sources[] = {
         -0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
         -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f
     };
+
+float base_particle[] = {
+    -0.5f, -0.5f, 0.0f,
+     0.5f, -0.5f, 0.0f,
+     0.0f, 0.5f, 0.0f,
+
+    -0.5f, -0.5f, 0.5f,
+     0.5f, -0.5f, 0.5f,
+     0.0f, 0.5f, 0.5f
+};
+unsigned int base_particle_indices[] = {
+    0, 1, 2,
+    3, 4, 5,
+    0, 3, 2,
+    2, 5, 3,
+    0, 3, 1,
+    1, 4, 3,
+    2, 5, 1,
+    1, 4, 5
+};
+
+struct Particle {
+    glm::vec4 offset;
+    Particle(glm::vec4 offset){
+        this->offset = offset;
+    }
+};
 
 #endif
