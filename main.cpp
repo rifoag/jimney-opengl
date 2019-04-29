@@ -10,21 +10,27 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
 #include "vertex.h"
+#include "ParticleFactory.h"
 
 using namespace std;
+
+
+#define JIMNEY
+#define LIGHT
 
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow* window);
 
-const unsigned int SCR_WIDTH = 800;
-const unsigned int SCR_HEIGHT = 600;
+const unsigned int SCR_WIDTH = 1920;
+const unsigned int SCR_HEIGHT = 1080;
 
-glm::vec3 cameraPos   = glm::vec3(0.0f, 0.0f,  3.0f);
+glm::vec3 cameraPos   = glm::vec3(0.0f, 0.0f,  1.0f);
 glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
 glm::vec3 cameraUp    = glm::vec3(0.0f, 1.0f,  0.0f);
 glm::vec3 lightPos(1.2f, 1.0f, 2.0f);
 int rotate = 0;
+float sudut = 0;
 
 
 int main() {
@@ -50,14 +56,6 @@ int main() {
     }
     Shader ourShader("shaders/jimney.vs", "shaders/jimney.fs"); 
 
-    glm::mat4 model = glm::mat4(1.0f);
-
-    glm::mat4 light_model = glm::mat4(1.0);
-    light_model = glm::translate(light_model, lightPos);
-    light_model = glm::scale(light_model, glm::vec3(0.2f));
-
-    glm::mat4 view = glm::mat4(1.0f);
-    glm::mat4 projection = glm::perspective(glm::radians(90.0f), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
 
 
     // JIMNEY OBJECT
@@ -102,9 +100,9 @@ int main() {
     }
     stbi_image_free(data);
 
+
+
     Shader light_shader("shaders/lighting.vs", "shaders/lighting.fs");
-
-
     // LIGHT
     unsigned int lightVAO, lightVBO, lightEBO;
     glGenVertexArrays(1, &lightVAO);
@@ -123,51 +121,39 @@ int main() {
     glEnableVertexAttribArray(1);
     
 
-    // Particles
-    unsigned int nr_particles = 1;
-    vector<Particle> particles;
-    for(unsigned int i = 0; i < nr_particles; i++) {
-        float x = (rand()%100)/100.0;
-        float y = (rand()%100)/100.0;
-        float z = (rand()%100)/100.0;
-        particles.push_back(Particle(glm::vec4(x, y, z, 0.0)));
-    }
+    // COORDINATE SYSTEM
+    model = glm::mat4(1.0f);
+    view = glm::mat4(1.0f);
+    projection = glm::perspective(glm::radians(45.0f), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
 
-    unsigned int particleVAO, particleVBO, particleEBO;
-    glGenVertexArrays(1, &particleVAO);
-    glGenBuffers(1, &particleVBO);
-    glGenBuffers(1, &particleEBO);
-    glBindVertexArray(particleVAO);
-    glBindBuffer(GL_ARRAY_BUFFER, particleVBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(base_particle), base_particle, GL_STATIC_DRAW);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, particleEBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(base_particle_indices), base_particle_indices, GL_STATIC_DRAW);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
-    glEnableVertexAttribArray(0);
-
-    glm::mat4 transform = glm::mat4(1.0);
-    transform = glm::scale(transform, glm::vec3(0.05, 0.05, 0.05));
-
-    Shader particle_shader("shaders/particle.vs", "shaders/particle.fs");
+    glm::mat4 light_transform = glm::mat4(1.0);
+    light_transform = glm::translate(light_transform, lightPos);
+    light_transform = glm::scale(light_transform, glm::vec3(0.2f));
+    transform = glm::mat4(1.0);
+    transform = glm::scale(transform, glm::vec3(0.0025, 0.005, 0.005));
+    glm::mat4 jtransform = glm::mat4(1.0);
+    jtransform = glm::scale(jtransform, glm::vec3(0.1, 0.1, 0.1));
 
 
+    Shader pshader("shaders/particle.vs", "shaders/particle.fs");
+    ParticleFactory rain = ParticleFactory(5000, glm::vec4(1.0f,1.0f,1.0f,1.0f), 0.01, pshader);
+    ParticleFactory rain2 = ParticleFactory(5000, glm::vec4(1.0f,0.0f,0.0f,1.0f), 0.01, pshader);
+
+        view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
     glEnable(GL_DEPTH_TEST);
     while (!glfwWindowShouldClose(window)) {
         processInput(window);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+        view = glm::rotate(view, glm::radians(1.0f), glm::vec3(0.0f,1.0f,0.0f));
+
 
         // JIMNEY
-        model = glm::rotate(model, glm::radians(1.0f) * rotate, glm::vec3(0.0f, 1.0f, 0.0f));
-        view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
-        view = glm::rotate(view, glm::radians(1.0f) * rotate, glm::vec3(0.0f, 1.0f, 0.0f));
-
         #ifdef JIMNEY
         ourShader.use();
         glBindVertexArray(VAO);
-        glBindBuffer(GL_ARRAY_BUFFER, VBO);
 
-        ourShader.setMat4("model", model);
+        ourShader.setMat4("model", model * jtransform);
         ourShader.setMat4("view", view);
         ourShader.setMat4("projection", projection);
         ourShader.setVec3("objectColor", 1.0f, 0.5f, 0.31f);
@@ -180,30 +166,16 @@ int main() {
 
         #ifdef LIGHT
         light_shader.use();
-        light_shader.setMat4("model", light_model);
+        light_shader.setMat4("model", model * light_transform);
         light_shader.setMat4("view", view);
         light_shader.setMat4("projection", projection);
 
         glBindVertexArray(lightVAO);
-        glBindBuffer(GL_ARRAY_BUFFER, lightVBO);
         glDrawArrays(GL_TRIANGLES, 0, 36);
         #endif
 
-
-        //PARTICLE
-        particle_shader.setMat4("model", model);
-        particle_shader.use();
-        particle_shader.setMat4("view", view);
-        particle_shader.setMat4("projection", projection);
-        particle_shader.setMat4("transform", transform);
-        for (Particle particle: particles) {
-            //particle_shader.setVec2("offset", particle.Position.x, particle.Position.y);
-            //particle_shader.setVec4("color", particle.color);
-            cout<< particle.offset.x << endl;
-            particle_shader.setVec4("offset", particle.offset);
-            glBindVertexArray(particleVAO);
-            glDrawElements(GL_TRIANGLES, 24, GL_UNSIGNED_INT, 0);
-        }
+        rain.draw();
+        rain2.draw();
 
         glfwSwapBuffers(window);
         glfwPollEvents();
@@ -231,20 +203,10 @@ void processInput(GLFWwindow* window) {
     float cameraSpeed = 0.05f; // adjust accordingly
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
         cameraPos += cameraSpeed * cameraFront;
-    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS && cameraPos.z < 1.0f)
         cameraPos -= cameraSpeed * cameraFront;
     if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
         cameraPos -= glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
         cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
-    if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
-        cameraPos += cameraUp * cameraSpeed;
-    if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
-        cameraPos -= cameraUp * cameraSpeed;
-    if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS)
-        rotate = 1;
-    else if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS)
-        rotate = -1;
-    else
-        rotate = 0;
 }

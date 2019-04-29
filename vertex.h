@@ -122,4 +122,9 @@ struct Particle {
     }
 };
 
+glm::mat4 model;
+glm::mat4 view;
+glm::mat4 projection;
+glm::mat4 transform;
+
 #endif
