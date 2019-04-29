@@ -63,15 +63,11 @@ int main() {
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
     glGenBuffers(1, &EBO);
-
     glBindVertexArray(VAO);
-
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8*sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8*sizeof(float), (void*)(3 * sizeof(float)));
@@ -82,10 +78,8 @@ int main() {
     unsigned int texture;
     glGenTextures(1, &texture);
     glBindTexture(GL_TEXTURE_2D, texture);
-
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
-
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
@@ -102,21 +96,17 @@ int main() {
 
 
 
-    Shader light_shader("shaders/lighting.vs", "shaders/lighting.fs");
     // LIGHT
+    Shader light_shader("shaders/lighting.vs", "shaders/lighting.fs");
     unsigned int lightVAO, lightVBO, lightEBO;
     glGenVertexArrays(1, &lightVAO);
     glGenBuffers(1, &lightVBO);
     glGenBuffers(1, &lightEBO);
-
     glBindVertexArray(lightVAO);
-
     glBindBuffer(GL_ARRAY_BUFFER, lightVBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(light_sources), light_sources, GL_STATIC_DRAW);
-
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6*sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
-
     glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6*sizeof(float), (void*)(3*sizeof(float)));
     glEnableVertexAttribArray(1);
     
@@ -139,14 +129,13 @@ int main() {
     ParticleFactory rain = ParticleFactory(5000, glm::vec4(1.0f,1.0f,1.0f,1.0f), 0.01, pshader);
     ParticleFactory rain2 = ParticleFactory(5000, glm::vec4(1.0f,0.0f,0.0f,1.0f), 0.01, pshader);
 
-        view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
     glEnable(GL_DEPTH_TEST);
     while (!glfwWindowShouldClose(window)) {
         processInput(window);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        view = glm::rotate(view, glm::radians(1.0f), glm::vec3(0.0f,1.0f,0.0f));
-
+        view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
+        view = glm::rotate(view, glm::radians(sudut), glm::vec3(0.0f,1.0f,0.0f));
 
         // JIMNEY
         #ifdef JIMNEY
@@ -209,4 +198,8 @@ void processInput(GLFWwindow* window) {
         cameraPos -= glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
         cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
+    if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS)
+        sudut -= 1.0f;
+    if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS)
+        sudut += 1.0f;
 }
