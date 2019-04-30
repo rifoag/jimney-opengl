@@ -68,6 +68,12 @@ public:
         glDeleteShader(vertex);
         glDeleteShader(fragment);
     }
+
+    Shader() {}
+    Shader& operator =(const Shader& shader){
+        this->ID = shader.ID;
+        return *this;
+    }
     // activate the shader
     // ------------------------------------------------------------------------
     void use() 

@@ -115,12 +115,6 @@ unsigned int base_particle_indices[] = {
     1, 4, 5
 };
 
-struct Particle {
-    glm::vec4 offset;
-    Particle(glm::vec4 offset){
-        this->offset = offset;
-    }
-};
 
 glm::mat4 model;
 glm::mat4 view;

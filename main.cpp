@@ -11,6 +11,7 @@
 #include <stb_image.h>
 #include "vertex.h"
 #include "ParticleFactory.h"
+#include "Particle.h"
 
 using namespace std;
 
@@ -116,18 +117,18 @@ int main() {
     view = glm::mat4(1.0f);
     projection = glm::perspective(glm::radians(45.0f), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
 
-    glm::mat4 light_transform = glm::mat4(1.0);
-    light_transform = glm::translate(light_transform, lightPos);
-    light_transform = glm::scale(light_transform, glm::vec3(0.2f));
-    transform = glm::mat4(1.0);
-    transform = glm::scale(transform, glm::vec3(0.0025, 0.005, 0.005));
+    glm::mat4 model_light = glm::mat4(1.0);
+    model_light = glm::translate(model_light, lightPos);
+    model_light = glm::scale(model_light, glm::vec3(0.2f));
     glm::mat4 jtransform = glm::mat4(1.0);
     jtransform = glm::scale(jtransform, glm::vec3(0.1, 0.1, 0.1));
 
+    transform = glm::mat4(1.0);
+    transform = glm::scale(transform, glm::vec3(0.0025, 0.005, 0.005));
 
-    Shader pshader("shaders/particle.vs", "shaders/particle.fs");
-    ParticleFactory rain = ParticleFactory(5000, glm::vec4(1.0f,1.0f,1.0f,1.0f), 0.01, pshader);
-    ParticleFactory rain2 = ParticleFactory(5000, glm::vec4(1.0f,0.0f,0.0f,1.0f), 0.01, pshader);
+    glm::vec4 rain_speed = glm::vec4(0.0f, -0.01f, 0.0f, 0.0f);
+    ParticleFactory rain = ParticleFactory(5000, glm::vec4(1.0f,1.0f,1.0f,1.0f), rain_speed);
+    ParticleFactory rain2 = ParticleFactory(5000, glm::vec4(1.0f,0.0f,0.0f,1.0f), rain_speed);
 
     glEnable(GL_DEPTH_TEST);
     while (!glfwWindowShouldClose(window)) {
@@ -155,7 +156,7 @@ int main() {
 
         #ifdef LIGHT
         light_shader.use();
-        light_shader.setMat4("model", model * light_transform);
+        light_shader.setMat4("model", model_light);
         light_shader.setMat4("view", view);
         light_shader.setMat4("projection", projection);
 
