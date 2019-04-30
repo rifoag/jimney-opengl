@@ -127,12 +127,17 @@ int main() {
     transform = glm::scale(transform, glm::vec3(0.0025, 0.005, 0.005));
 
     glm::vec4 rain_speed = glm::vec4(0.0f, -0.01f, 0.0f, 0.0f);
-    ParticleFactory rain = ParticleFactory(5000, glm::vec4(1.0f,1.0f,1.0f,1.0f), rain_speed);
-    ParticleFactory rain2 = ParticleFactory(5000, glm::vec4(1.0f,0.0f,0.0f,1.0f), rain_speed);
+    RainFactory rain = RainFactory(5000, glm::vec4(0.0f,1.0f,1.0f,1.0f), rain_speed);
+    RainFactory rain2 = RainFactory(5000, glm::vec4(1.0f,0.0f,0.0f,1.0f), rain_speed);
+    RainFactory rain3 = RainFactory(5000, glm::vec4(1.0f,1.0f,0.0f,1.0f), rain_speed);
+    glm::vec4 smoke_origin = glm::vec4(0.1,0.0001,0.0,0.0);
+    SmokeFactory smoke = SmokeFactory(5000, glm::vec4(0.0,0.0,0.0,0.0), smoke_origin);
 
     glEnable(GL_DEPTH_TEST);
     while (!glfwWindowShouldClose(window)) {
         processInput(window);
+        glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
@@ -166,6 +171,8 @@ int main() {
 
         rain.draw();
         rain2.draw();
+        rain3.draw();
+        smoke.draw();
 
         glfwSwapBuffers(window);
         glfwPollEvents();

@@ -121,4 +121,10 @@ glm::mat4 view;
 glm::mat4 projection;
 glm::mat4 transform;
 
+float random(float start, float end) {
+    float f = (rand() % 100)/100.0;
+    double result = start + f * (end - start);
+    return result;
+}
+
 #endif
